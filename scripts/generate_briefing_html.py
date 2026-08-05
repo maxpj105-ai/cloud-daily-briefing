@@ -554,7 +554,164 @@ def generate_signals_html(signals_data):
             '  <div class="chip-bar-chart">\n'
             '    ' + chart_html + '\n'
             '    <div class="chart-row" style="margin-top: 0.4rem; font-weight: 700;">\n'
-            '      <span>近3日累計買賣超</span>
+            '      <span>近3日累計買賣超</span>\n'
+            '      <span class="chip-val ' + tot_class + '">' + f"{total_lots:+,.0f}" + ' 張</span>\n'
+            '    </div>\n'
+            '  </div>\n'
+            '</div>'
+        )
+        cards.append(card_html)
+    return "\n".join(cards)
 
+def format_text_with_links(text):
+    if not text:
+        return ""
+    formatted = re.sub(
+        r'\[(.*?)\]\((https?://[^\s\)]+)\)',
+        r'<a href="\2" target="_blank" rel="noopener" class="card-link">\1 🔗</a>',
+        str(text)
+    )
+    return formatted.replace('\n', '<br>')
 
+def generate_tier_html(tier_data):
+    t1_items = []
+    
+    for idx_t1, t1 in enumerate(tier_data):
+        open_t1 = "open" if idx_t1 < 3 else "" # First 3 Tier1 sections open by default
+        icon_t1 = str(t1.get('icon', '📌'))
+        title_t1 = str(t1.get('title', ''))
+        sub_items = t1.get('subsections', t1.get('sub_sections', []))
+        
+        t2_items = []
+        for idx_t2, t2 in enumerate(sub_items):
+            open_t2 = "open" if idx_t2 < 2 else "" # First 2 sub-sections open by default
+            title_t2 = str(t2.get('title', ''))
+            t3_cards = t2.get('cards', [])
+            
+            cards_html_list = []
+            for t3 in t3_cards:
+                tag = str(t3.get('tag', ''))
+                tag_color = str(t3.get('tag_color', 'blue'))
+                card_title = str(t3.get('title', ''))
+                card_text = format_text_with_links(t3.get('text', t3.get('content', '')))
+                
+                tag_html = f'<span class="tag-badge {tag_color}">{tag}</span>' if tag else ''
+                
+                # Check for Video Nested Chapters (Tier 4 Accordion inside card)
+                video_nested_html = ""
+                if 'video_chapters' in t3 and t3['video_chapters']:
+                    v_items = []
+                    for idx_v, vc in enumerate(t3['video_chapters']):
+                        open_v = "open" if idx_v == 0 else ""
+                        v_title = str(vc.get('title', vc.get('chapter_title', '')))
+                        v_detail = format_text_with_links(vc.get('content', vc.get('detail', '')))
+                        v_item_str = (
+                            '<details class="v-item" ' + open_v + '>\n'
+                            '  <summary class="v-header">\n'
+                            '    <span>🎬 ' + v_title + '</span>\n'
+                            '    <span class="v-icon">▼</span>\n'
+                            '  </summary>\n'
+                            '  <div class="v-content">\n'
+                            '    ' + v_detail + '\n'
+                            '  </div>\n'
+                            '</details>'
+                        )
+                        v_items.append(v_item_str)
+                    video_nested_html = '<div class="video-accordion">' + "".join(v_items) + '</div>'
+                
+                progress_html = ""
+                if 'progress' in t3 or 'progress_pct' in t3:
+                    pct = t3.get('progress', t3.get('progress_pct', 0))
+                    lbl = str(t3.get('progress_label', '指標進度'))
+                    progress_html = (
+                        '<div class="progress-summary">\n'
+                        '  <div class="progress-header">\n'
+                        '    <span>' + lbl + '</span>\n'
+                        '    <span>' + str(pct) + '%</span>\n'
+                        '  </div>\n'
+                        '  <div class="progress-bar-bg">\n'
+                        '    <div class="progress-bar-val" style="width: ' + str(pct) + '%;"></div>\n'
+                        '  </div>\n'
+                        '</div>'
+                    )
+                
+                c_html = (
+                    '<div class="t3-card">\n'
+                    '  <div class="t3-card-title">\n'
+                    '    ' + tag_html + '\n'
+                    '    <span>' + card_title + '</span>\n'
+                    '  </div>\n'
+                    '  <div class="t3-card-text">' + card_text + '</div>\n'
+                    '  ' + video_nested_html + '\n'
+                    '  ' + progress_html + '\n'
+                    '</div>'
+                )
+                cards_html_list.append(c_html)
+            
+            cards_grid_html = "\n".join(cards_html_list)
+            
+            t2_html = (
+                '<details class="t2-item" ' + open_t2 + '>\n'
+                '  <summary class="t2-header">\n'
+                '    <span>' + title_t2 + '</span>\n'
+                '    <span class="t2-icon">▼</span>\n'
+                '  </summary>\n'
+                '  <div class="t2-content">\n'
+                '    <div class="t3-cards-grid">\n'
+                '      ' + cards_grid_html + '\n'
+                '    </div>\n'
+                '  </div>\n'
+                '</details>'
+            )
+            t2_items.append(t2_html)
+        
+        t2_container_html = "\n".join(t2_items)
+        
+        t1_html = (
+            '<details class="t1-item" ' + open_t1 + '>\n'
+            '  <summary class="t1-header">\n'
+            '    <span>' + icon_t1 + ' ' + title_t1 + '</span>\n'
+            '    <span class="t1-icon">▼</span>\n'
+            '  </summary>\n'
+            '  <div class="t1-content">\n'
+            '    <div class="t2-container">\n'
+            '      ' + t2_container_html + '\n'
+            '    </div>\n'
+            '  </div>\n'
+            '</details>'
+        )
+        t1_items.append(t1_html)
+        
+    return "\n".join(t1_items)
 
+def render_briefing_html(briefing_data, output_path):
+    date_str = briefing_data.get('date', datetime.datetime.now().strftime('%Y-%m-%d'))
+    fetch_time = briefing_data.get('fetch_time', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    
+    signals_html = generate_signals_html(briefing_data.get('signals', {}))
+    tier1_html = generate_tier_html(briefing_data.get('tiers', briefing_data.get('tier_sections', briefing_data.get('sections', []))))
+    
+    html_content = (
+        HTML_TEMPLATE
+        .replace('{date}', str(date_str))
+        .replace('{fetch_time}', str(fetch_time))
+        .replace('{signals_html}', str(signals_html))
+        .replace('{tier1_html}', str(tier1_html))
+    )
+    
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    
+    print(f"HTML successfully generated at: {output_path}")
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        json_path = sys.argv[1]
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        date_str = data.get('date', datetime.datetime.now().strftime('%Y-%m-%d'))
+        out_path = data.get('output_path', f"C:/Users/max.fanchiang/Desktop/{date_str}_Daily_Briefing.html")
+        render_briefing_html(data, out_path)
+    else:
+        print("generate_briefing_html deep interactive engine ready.")
