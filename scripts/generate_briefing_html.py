@@ -149,16 +149,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     .signal-card {{
       background: var(--bg-card);
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
       padding: 1.5rem;
       box-shadow: var(--shadow-glass);
+      position: relative;
+      overflow: hidden;
     }}
 
-    .signal-card.green {{ border-top: 4px solid var(--accent-green); box-shadow: 0 8px 32px var(--glow-green); }}
-    .signal-card.yellow {{ border-top: 4px solid var(--accent-yellow); box-shadow: 0 8px 32px var(--glow-yellow); }}
-    .signal-card.red {{ border-top: 4px solid var(--accent-red); box-shadow: 0 8px 32px var(--glow-red); }}
+    .signal-card::before {{
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+    }}
+    .signal-card.green::before {{ background: var(--accent-green); box-shadow: 0 0 12px var(--accent-green); }}
+    .signal-card.yellow::before {{ background: var(--accent-yellow); box-shadow: 0 0 12px var(--accent-yellow); }}
+    .signal-card.red::before {{ background: var(--accent-red); box-shadow: 0 0 12px var(--accent-red); }}
 
     .signal-header {{
       display: flex;
@@ -167,30 +175,49 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       margin-bottom: 1rem;
     }}
 
-    .etf-code {{ font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 800; }}
-    .etf-name {{ font-size: 0.9rem; color: var(--text-muted); margin-left: 0.4rem; }}
-    .signal-badge {{ padding: 0.4rem 0.9rem; border-radius: 30px; font-size: 0.85rem; font-weight: 700; }}
-    .signal-badge.green {{ background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.4); }}
-    .signal-badge.yellow {{ background: rgba(245, 158, 11, 0.15); color: var(--accent-yellow); border: 1px solid rgba(245, 158, 11, 0.4); }}
-    .signal-badge.red {{ background: rgba(239, 68, 68, 0.15); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.4); }}
+    .etf-code {{
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }}
+
+    .etf-name {{
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-left: 0.5rem;
+    }}
+
+    .signal-badge {{
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }}
+    .signal-badge.green {{ background: var(--glow-green); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.4); }}
+    .signal-badge.yellow {{ background: var(--glow-yellow); color: var(--accent-yellow); border: 1px solid rgba(245, 158, 11, 0.4); }}
+    .signal-badge.red {{ background: var(--glow-red); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.4); }}
 
     .signal-reason {{
       font-size: 0.92rem;
+      color: var(--text-main);
       background: rgba(255, 255, 255, 0.03);
-      padding: 0.85rem;
+      padding: 0.85rem 1rem;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border-color);
-      margin-bottom: 1rem;
+      margin-bottom: 1.2rem;
+      line-height: 1.55;
     }}
 
-    /* CSS Micro Bar Chart for Chip Trends */
+    /* CSS Bar Chart */
     .chip-bar-chart {{
+      margin-top: 1rem;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 0.85rem;
-      padding-top: 0.75rem;
-      border-top: 1px dashed var(--border-color);
+      gap: 0.6rem;
     }}
 
     .chart-row {{
@@ -213,12 +240,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     .chart-bar-fill.green {{ background: var(--accent-green); }}
     .chart-bar-fill.red {{ background: var(--accent-red); }}
 
-    /* ACCORDION SYSTEM */
+    /* ACCORDION SYSTEM - HTML5 Native Details/Summary (LINE & Sandbox Bulletproof) */
     .tier-1-accordion {{
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
       margin-bottom: 2rem;
+    }}
+
+    details summary {{
+      list-style: none;
+      cursor: pointer;
+      outline: none;
+    }}
+    details summary::-webkit-details-marker,
+    details summary::marker {{
+      display: none;
     }}
 
     .t1-item {{
@@ -228,6 +265,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       border-radius: var(--radius-lg);
       overflow: hidden;
       box-shadow: var(--shadow-glass);
+      display: block;
     }}
 
     .t1-header {{
@@ -243,17 +281,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     .t1-header:hover {{ background: var(--bg-card-hover); }}
     .t1-icon {{ transition: transform 0.3s ease; color: var(--accent-cyan); }}
+    
+    details[open] > summary .t1-icon,
     .t1-item.active > .t1-header > .t1-icon {{ transform: rotate(180deg); }}
 
     .t1-content {{
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease-in-out, padding 0.3s ease;
-      padding: 0 1.5rem;
-    }}
-
-    .t1-item.active > .t1-content {{
-      max-height: 10000px;
       padding: 1.25rem 1.5rem 1.5rem 1.5rem;
       border-top: 1px solid var(--border-color);
     }}
@@ -265,6 +297,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       border: 1px solid var(--border-color);
       border-radius: var(--radius-md);
       overflow: hidden;
+      display: block;
     }}
 
     .t2-header {{
@@ -281,17 +314,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     .t2-header:hover {{ background: rgba(255, 255, 255, 0.04); }}
     .t2-icon {{ transition: transform 0.3s ease; font-size: 0.85rem; }}
+    
+    details[open] > summary .t2-icon,
     .t2-item.active > .t2-header > .t2-icon {{ transform: rotate(180deg); }}
 
     .t2-content {{
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-in-out, padding 0.25s ease;
-      padding: 0 1.2rem;
-    }}
-
-    .t2-item.active > .t2-content {{
-      max-height: 8000px;
       padding: 1rem 1.2rem 1.2rem 1.2rem;
       border-top: 1px solid var(--border-color);
     }}
@@ -335,6 +362,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       border: 1px solid var(--border-color);
       border-radius: var(--radius-sm);
       overflow: hidden;
+      display: block;
     }}
 
     .v-header {{
@@ -351,17 +379,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     .v-header:hover {{ background: rgba(99, 102, 241, 0.1); }}
     .v-icon {{ transition: transform 0.3s ease; color: var(--accent-cyan); font-size: 0.8rem; }}
+    
+    details[open] > summary .v-icon,
     .v-item.active > .v-header > .v-icon {{ transform: rotate(180deg); }}
 
     .v-content {{
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.25s ease;
-      padding: 0 1rem;
-    }}
-
-    .v-item.active > .v-content {{
-      max-height: 1500px;
       padding: 0.85rem 1rem 1rem 1rem;
       border-top: 1px dashed var(--border-color);
       color: var(--text-muted);
@@ -450,30 +472,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       document.getElementById('theme-icon').textContent = next === 'dark' ? '🌙' : '☀️';
       document.getElementById('theme-text').textContent = next === 'dark' ? '深色模式' : '亮色模式';
     }}
-
-    // Tier 1 Accordion
-    document.querySelectorAll('.t1-header').forEach(header => {{
-      header.addEventListener('click', (e) => {{
-        e.stopPropagation();
-        header.parentElement.classList.toggle('active');
-      }});
-    }});
-
-    // Tier 2 Accordion
-    document.querySelectorAll('.t2-header').forEach(header => {{
-      header.addEventListener('click', (e) => {{
-        e.stopPropagation();
-        header.parentElement.classList.toggle('active');
-      }});
-    }});
-
-    // Video Nested Accordion (Tier 4)
-    document.querySelectorAll('.v-header').forEach(header => {{
-      header.addEventListener('click', (e) => {{
-        e.stopPropagation();
-        header.parentElement.classList.toggle('active');
-      }});
-    }});
   </script>
 </body>
 </html>
@@ -545,14 +543,14 @@ def generate_tier_html(tier_data):
     t1_items = []
     
     for idx_t1, t1 in enumerate(tier_data):
-        active_class_t1 = "active" if idx_t1 == 0 else ""
+        open_t1 = "open" if idx_t1 < 3 else "" # First 3 Tier1 sections open by default
         icon_t1 = t1.get('icon', '📌')
         title_t1 = t1.get('title', '')
         sub_items = t1.get('sub_sections', [])
         
         t2_items = []
         for idx_t2, t2 in enumerate(sub_items):
-            active_class_t2 = "active" if (idx_t1 == 0 and idx_t2 == 0) else ""
+            open_t2 = "open" if idx_t2 < 2 else "" # First 2 sub-sections open by default
             title_t2 = t2.get('title', '')
             t3_cards = t2.get('cards', [])
             
@@ -570,19 +568,19 @@ def generate_tier_html(tier_data):
                 if 'video_chapters' in t3 and t3['video_chapters']:
                     v_items = []
                     for idx_v, vc in enumerate(t3['video_chapters']):
-                        v_active = "active" if idx_v == 0 else ""
+                        open_v = "open" if idx_v == 0 else ""
                         v_title = vc.get('chapter_title', '')
                         v_detail = vc.get('detail', '')
                         v_items.append(f"""
-                        <div class="v-item {v_active}">
-                          <div class="v-header">
+                        <details class="v-item" {open_v}>
+                          <summary class="v-header">
                             <span>🎬 {v_title}</span>
                             <span class="v-icon">▼</span>
-                          </div>
+                          </summary>
                           <div class="v-content">
                             {v_detail}
                           </div>
-                        </div>
+                        </details>
                         """)
                     video_nested_html = f'<div class="video-accordion">{"".join(v_items)}</div>'
                 
@@ -618,34 +616,34 @@ def generate_tier_html(tier_data):
             cards_grid_html = "\n".join(cards_html_list)
             
             t2_html = f"""
-            <div class="t2-item {active_class_t2}">
-              <div class="t2-header">
+            <details class="t2-item" {open_t2}>
+              <summary class="t2-header">
                 <span>{title_t2}</span>
                 <span class="t2-icon">▼</span>
-              </div>
+              </summary>
               <div class="t2-content">
                 <div class="t3-cards-grid">
                   {cards_grid_html}
                 </div>
               </div>
-            </div>
+            </details>
             """
             t2_items.append(t2_html)
         
         t2_container_html = "\n".join(t2_items)
         
         t1_html = f"""
-        <div class="t1-item {active_class_t1}">
-          <div class="t1-header">
+        <details class="t1-item" {open_t1}>
+          <summary class="t1-header">
             <span>{icon_t1} {title_t1}</span>
             <span class="t1-icon">▼</span>
-          </div>
+          </summary>
           <div class="t1-content">
             <div class="t2-container">
               {t2_container_html}
             </div>
           </div>
-        </div>
+        </details>
         """
         t1_items.append(t1_html)
         
@@ -677,7 +675,7 @@ if __name__ == '__main__':
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         date_str = data.get('date', datetime.datetime.now().strftime('%Y-%m-%d'))
-        out_path = data.get('output_path', f"C:\\Users\\max.fanchiang\\Desktop\\{date_str}_Daily_Briefing.html")
+        out_path = data.get('output_path', f"C:/Users/max.fanchiang/Desktop/{date_str}_Daily_Briefing.html")
         render_briefing_html(data, out_path)
     else:
         print("generate_briefing_html deep interactive engine ready.")
