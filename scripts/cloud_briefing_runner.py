@@ -448,13 +448,13 @@ def main():
                         ]
                     },
                     {
-                        "title": "優質好書推薦 (含雅書連結與佳句)",
+                        "title": "優質好書推薦 (含直達介紹內頁與原版文獻連結)",
                         "cards": [
                             {
                                 "tag": "好書推薦 📚",
                                 "tag_color": "green",
-                                "title": "《致富心態》 (The Psychology of Money) - 摩根．豪瑟 (Morgan Housel)",
-                                "content": "<b>📖 簡短書摘簡介 (Book Summary)：</b><br>本書透過 20 篇短篇故事，闡述決定投資成敗的往往不是你的智商，而是你的『理財行為與心態』。<br><br><b>💬 經典佳句摘取 (Quote Excerpt)：</b><br><i>「理財成功與否，跟你有多聰明關係不大，但跟你如何行為舉止大有關係。」</i><br><br>🔗 <b>雅書搜尋專屬連結：</b> <a href=\"https://yabook.org/?s=%E8%87%B4%E5%AF%8C%E5%BF%83%E6%85%8B\" target=\"_blank\" style=\"color: var(--accent-cyan); font-weight: 600;\">https://yabook.org/?s=致富心態</a>"
+                                "title": "《巴菲特寫給股東的信》 (The Essays of Warren Buffett) - 華倫．巴菲特 / 勞倫斯．康納斯",
+                                "content": "<b>📖 簡短書摘簡介 (Book Summary)：</b><br>本書由勞倫斯．康納斯整理巴菲特數十年來寫給波克夏股東的公開信，分類為公司治理、投資哲學、普通股選擇與會計陷阱等，被譽為全球價值投資人的聖經。<br><br><b>💬 經典佳句摘取 (Quote Excerpt)：</b><br><i>「當別人心懷恐懼時，要保持貪婪；當別人滿懷貪婪時，要保持恐懼。」</i><br><br>👉 [點此查看《巴菲特寫給股東的信》詳細書籍介紹與繁體中文電子書內頁](https://www.readmoo.com/book/210168940000101)<br>👉 [點此直達伯克希爾波克夏 (Berkshire Hathaway) 官方原版股東信資料庫](https://www.berkshirehathaway.com/letters/letters.html)"
                             }
                         ]
                     },
