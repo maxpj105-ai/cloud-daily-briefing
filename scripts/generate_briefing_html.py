@@ -679,3 +679,4 @@ if __name__ == '__main__':
         render_briefing_html(data, out_path)
     else:
         print("generate_briefing_html deep interactive engine ready.")
+
