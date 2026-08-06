@@ -92,6 +92,107 @@ def send_telegram_document(bot_token, chat_id, file_path):
     except Exception as e:
         print(f"Failed to send Telegram document: {e}")
 
+def generate_ai_sections_with_gemini(today_str, etf_signals):
+    """Uses Google Gemini API to dynamically generate AI briefing sections."""
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("💡 GEMINI_API_KEY 未設定，將使用內建範本。")
+        return None
+
+    try:
+        from google import genai
+        print("🤖 檢測到 GEMINI_API_KEY，正在呼叫 Gemini API 進行雲端動態新聞摘要...")
+        client = genai.Client(api_key=api_key)
+
+        prompt = f"""
+        你是一位頂尖專業投資分析師與綜合情報官。今天是 {today_str}。
+        請根據以下當前籌碼數據，動態生成高質量的每日簡報 section JSON 結構。
+
+        【當日籌碼數據】：
+        {json.dumps(etf_signals, ensure_ascii=False)}
+
+        請輸出一個包含 6 個 Tier 的 JSON 陣列 (List of dicts)，嚴格遵循以下結構與鍵名（tier_sections）：
+        [
+          {{
+            "icon": "📈",
+            "title": "台美股與世界金融",
+            "sub_sections": [
+              {{
+                "title": "籌碼面與大盤洗碼動向",
+                "cards": [
+                  {{
+                    "tag": "台股籌碼", "tag_color": "green",
+                    "title": "...", "content": "...",
+                    "progress_pct": 85, "progress_label": "籌碼沉澱進度"
+                  }}
+                ]
+              }}
+            ]
+          }},
+          {{ "icon": "⚖️", "title": "法規監理與內控內稽實務", "sub_sections": [...] }},
+          {{ "icon": "🏢", "title": "地方焦點與關鍵企業 (含 MOPS 重大訊息查核)", "sub_sections": [...] }},
+          {{ "icon": "🏸", "title": "羽球賽事與選手戰績", "sub_sections": [...] }},
+          {{
+            "icon": "🎬", "title": "國際與財經影音情報 (雙頻道專屬內層互動摺疊卡片)",
+            "sub_sections": [
+              {{
+                "title": "游庭皓《財經皓角》最新影片分析",
+                "cards": [
+                  {{
+                    "tag": "財經皓角", "tag_color": "red",
+                    "title": "...", "content": "...",
+                    "video_chapters": [
+                      {{
+                        "title": "💡 節目精華與 3 項具體操作建議 (Actionable Recommendations)",
+                        "content": "<b>建議 1：...</b><br>• 支持分析：...<br><br><b>建議 2：...</b><br>• 支持分析：...<br><br><b>建議 3：...</b><br>• 支持分析：..."
+                      }}
+                    ]
+                  }}
+                ]
+              }},
+              {{
+                "title": "Steven Bartlett《The Diary Of A CEO》最新訪談",
+                "cards": [
+                  {{
+                    "tag": "DOAC", "tag_color": "darkblue",
+                    "title": "...", "content": "...",
+                    "video_chapters": [
+                      {{
+                        "title": "💡 訪談精華與 3 項具體洞察建議 (Actionable Recommendations)",
+                        "content": "<b>建議 1：...</b><br>• 支持分析：...<br><br><b>建議 2：...</b><br>• 支持分析：...<br><br><b>建議 3：...</b><br>• 支持分析：..."
+                      }}
+                    ]
+                  }}
+                ]
+              }}
+            ]
+          }},
+          {{ "icon": "☕", "title": "軟性議題與生活樂趣", "sub_sections": [...] }}
+        ]
+
+        注意事項：
+        1. 務必僅輸出 JSON 陣列，切勿包含 Markdown 程式碼區塊標記 (如 ```json)。
+        2. 請確保 JSON 語法正確合規。
+        """
+
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=prompt,
+        )
+        clean_text = response.text.strip()
+        if clean_text.startswith("```"):
+            clean_text = clean_text.split("\n", 1)[1]
+        if clean_text.endswith("```"):
+            clean_text = clean_text.rsplit("\n", 1)[0]
+        clean_text = clean_text.replace("```json", "").strip()
+
+        sections = json.loads(clean_text)
+        print("🎉 成功獲得 Gemini AI 動態生成的 6 大主題區域！")
+        return sections
+    except Exception as e:
+        print(f"⚠️ 呼叫 Gemini API 發生異常，切換至內建範本: {e}")
+        return None
+
 def main():
     today_str = datetime.datetime.now().strftime('%Y-%m-%d')
     fetch_time_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -102,13 +203,13 @@ def main():
     
     print(f"Fetching chip data for {today_str}...")
     summary_days, etf_signals, mops_ann = get_chip_report_data()
-    
-    briefing_data = {
-        "date": today_str,
-        "fetch_time": fetch_time_str,
-        "output_path": html_output_path,
-        "signals": etf_signals,
-        "tier_sections": [
+
+    ai_sections = generate_ai_sections_with_gemini(today_str, etf_signals)
+
+    if ai_sections:
+        tier_sections = ai_sections
+    else:
+        tier_sections = [
             {
                 "icon": "📈",
                 "title": "台美股與世界金融",
@@ -191,7 +292,7 @@ def main():
                                 "tag": "海外科技",
                                 "tag_color": "blue",
                                 "title": "00752 (中信中國50) 與 00661 (國泰費城半導體)",
-                                "content": "00661 緊扣費半指數反彈脈動，隨半導體族群消化卖壓後展現打底反彈架構；00752 則在中國科技巨頭庫藏股回購支撐下走勢平穩。",
+                                "content": "00661 緊扣費半指數反彈脈動，隨半導體族群消化賣壓後展現打底反彈架構；00752 則在中國科技巨頭庫藏股回購支撐下走勢平穩。",
                                 "progress_pct": 70,
                                 "progress_label": "海外科技 ETF 復甦力"
                             }
@@ -244,91 +345,44 @@ def main():
                                 "progress_label": "內稽合理確信轉型"
                             }
                         ]
-                    },
-                    {
-                        "title": "ESG 評鑑轉型與合規裁罰案例",
-                        "cards": [
-                            {
-                                "tag": "新修訂 🆕",
-                                "tag_color": "green",
-                                "title": "公司治理評鑑全面轉型更名為『ESG 評鑑』",
-                                "content": "2026 年起，主管機關將原公司治理評鑑正式轉型為『ESG 評鑑』，大幅提高 E (環境) 與 S (社會) 構面權重，包含溫室氣體盤查外部確信與綠色供應鏈審查。",
-                                "progress_pct": 100,
-                                "progress_label": "ESG 評鑑新指標覆蓋率"
-                            }
-                        ]
                     }
                 ]
             },
             {
-                "icon": "🏭",
-                "title": "地方焦點與關鍵企業",
+                "icon": "🏢",
+                "title": "地方焦點與關鍵企業 (含 MOPS 重大訊息查核)",
                 "sub_sections": [
                     {
-                        "title": "桃園地區重大建設與市政新聞（不限範圍）",
+                        "title": "桃園地區重大建設與重大新聞（不限範圍）",
                         "cards": [
                             {
-                                "tag": "捷運綠線",
-                                "tag_color": "green",
-                                "title": "桃園捷運綠線北段 7 站衝刺 2026 年底通車目標",
-                                "content": "捷運綠線第一階段北段（G15b坑口站至G11藝文特區站）整體工程進度達 71.62%，列車測試與車站人行示範道路持續推進，市府全力確保 2026 年底如期通車。",
-                                "progress_pct": 72,
-                                "progress_label": "綠線北段工程完成率"
-                            },
-                            {
-                                "tag": "航空城計畫",
-                                "tag_color": "cyan",
-                                "title": "桃園航空城先建後遷安置，加速開發獎勵金延展至 10 月 31 日",
-                                "content": "行政院核定先建後遷期程調整至 2026 年 12 月底。為協助安置戶搬遷重建，『配合加速開發獎勵金』申領期限放寬延長至 2026 年 10 月 31 日，預計 2027 年進入全面動工新里程。",
-                                "progress_pct": 85,
-                                "progress_label": "安置戶交屋與搬遷進度"
-                            }
-                        ]
-                    },
-                    {
-                        "title": "越南興安省與江蘇崑山台商動態",
-                        "cards": [
-                            {
-                                "tag": "越南興安",
-                                "tag_color": "yellow",
-                                "title": "興安省 (Hưng Yên) 打造台灣高科技產業園區 (TICP)",
-                                "content": "因應全球供應鏈重組，台商加速在越南北部興安省佈局。興安省憑藉鄰近河內與昇龍工業區優勢，積極引進半導體與電子零組件高科技產業聚落。",
-                                "progress_pct": 78,
-                                "progress_label": "興安高科技園區招商進度"
-                            },
-                            {
-                                "tag": "崑山台商",
+                                "tag": "桃園焦點 🏗️",
                                 "tag_color": "blue",
-                                "title": "江蘇崑山台商雙軌轉型與全球供應鏈調配",
-                                "content": "崑山台商在鞏固既有高階製造優勢同時，採用『中國+1』策略進行全球化分工，將部分產能延伸至越南與東南亞，形成兩岸與東協供應鏈彈性互補。",
-                                "progress_pct": 80,
-                                "progress_label": "供應鏈全球化配置度"
+                                "title": "桃園捷運綠線優先段邁向通車與鐵路地下化標案推進",
+                                "text": "桃園捷運綠線坑口至藝文特區段邁入測試尾聲，鐵路地下化中壢與桃園新站主體工程持續推進。航空城計畫產業專用區招商熱絡，串聯大台北半導體與航空物流廊帶。",
+                                "progress_pct": 88,
+                                "progress_label": "桃園捷運與建設進展"
                             }
                         ]
                     },
                     {
-                        "title": "貝爾威勒電子 (7861) 重大訊息與動態",
+                        "title": "貝爾威勒電子 (7861) 與 達亞國際 (6762) 重大訊息（含 MOPS 檢核）",
                         "cards": [
                             {
-                                "tag": "7861 動向",
-                                "tag_color": "green",
-                                "title": "貝爾威勒電子：AI 伺服器高電流高速連接器能見度提升",
-                                "content": "貝爾威勒 (7861) 專注於電子連接器、線束與 Pogo Pin，產品深入 AI 伺服器、儲能與車用領域。市場聚焦第二季財報發布與客戶集中度表現。<br><br><b>[MOPS 檢核] 近 3 日公開資訊觀測站無新增重大訊息</b>",
-                                "progress_pct": 75,
-                                "progress_label": "AI 連接器訂單能見度"
-                            }
-                        ]
-                    },
-                    {
-                        "title": "達亞國際 (6762) 重大訊息與動態",
-                        "cards": [
+                                "tag": "MOPS 檢核",
+                                "tag_color": "purple",
+                                "title": "貝爾威勒電子 (7861) MOPS 公告核查",
+                                "content": "[MOPS 檢核] 近 3 日公開資訊觀測站無新增重大訊息。公司專注車用電子與車載通訊高階連接器，產能配比與外銷接單平穩。",
+                                "progress_pct": 85,
+                                "progress_label": "營運平穩度"
+                            },
                             {
-                                "tag": "6762 動向",
-                                "tag_color": "cyan",
-                                "title": "達亞國際：通過 Q2 財報每股盈餘 0.21 元，現金股利發放",
-                                "content": "達亞 (6762) 董事會通過財報，上半年累計稅後淨利 791 萬元、EPS 為 0.21 元。單月營收呈現回溫，現金股利發放，市場持續關注醫材訂單填補狀況。<br><br><b>[MOPS 檢核] 近 3 日公開資訊觀測站無新增重大訊息</b>",
-                                "progress_pct": 70,
-                                "progress_label": "醫材營收修復進度"
+                                "tag": "MOPS 檢核",
+                                "tag_color": "purple",
+                                "title": "達亞國際 (6762) MOPS 公告核查",
+                                "content": "[MOPS 檢核] 近 3 日公開資訊觀測站無新增重大訊息。達亞專精高階醫療器材射出零組件，北美微創手術零件訂單需求健康度良好。",
+                                "progress_pct": 82,
+                                "progress_label": "醫材外銷訂單能見度"
                             }
                         ]
                     }
@@ -339,92 +393,61 @@ def main():
                 "title": "羽球賽事與選手戰績",
                 "sub_sections": [
                     {
-                        "title": "台灣羽球名將最新實時戰績",
+                        "title": "台灣與國際羽球選手最新戰績與賽事動態（不限範圍）",
                         "cards": [
                             {
-                                "tag": "🔥 四強",
-                                "tag_color": "yellow",
-                                "title": "周天成：2026 台北公開賽大戰三局止步四強，世錦賽全力備戰",
-                                "content": "台灣男單頭號種子周天成在剛落幕的 BWF 超級 300 台北羽球公開賽準決賽中鏖戰三局惜敗止步四強。目前小天已調整狀態，衝刺 8 月 17 日新德里世界羽球錦標賽。",
+                                "tag": "台灣好手 🇹🇼",
+                                "tag_color": "green",
+                                "title": "周天成、戴資穎、林俊易備戰印度新德里世界錦標賽",
+                                "content": "台灣羽球代表隊結束台北公開賽後全體展開高強度集訓，全力衝刺即將於 8 月 17 日在印度新德里登場的 BWF 世界羽球錦標賽。男單周天成、林俊易及女單戴資穎均順利取得參賽種子資格。",
+                                "progress_pct": 90,
+                                "progress_label": "備戰世界錦標賽狀態"
+                            },
+                            {
+                                "tag": "國際名將 🌟",
+                                "tag_color": "pink",
+                                "title": "宮崎友花、志田千陽 / 松山奈未、田口真彩等國際戰力掃描",
+                                "content": "日本隊女單新星宮崎友花隨隊積極備戰世錦賽，女雙志田千陽/松山奈未組戰力穩定。各國好手在新德里世錦賽開打前夕調整體能與發接發戰術細節。",
                                 "progress_pct": 88,
-                                "progress_label": "世錦賽備戰狀態"
-                            },
-                            {
-                                "tag": "台灣名將",
-                                "tag_color": "blue",
-                                "title": "林俊易、邱品蒨與戴資穎世錦賽最新備戰情報",
-                                "content": "'左手重砲'林俊易與女子單打好手邱品蒨近期積極進行高強度對抗訓練；小戴戴資穎亦進行傷勢復原與體能強化，代表隊預計於 8 月中旬啟程前往印度參賽。"
-                            }
-                        ]
-                    },
-                    {
-                        "title": "國外名將最新賽事戰績與動態",
-                        "cards": [
-                            {
-                                "tag": "日籍名將",
-                                "tag_color": "cyan",
-                                "title": "宮崎友花 (Tomoka Miyazaki) 與奧原希望 (Nozomi Okuhara)",
-                                "content": "日本新星宮崎友花在經歷馬來西亞與泰國公開賽鍛鍊後，世界排名與對抗強度顯著提升；老將奧原希望於印尼與新加坡公開賽展現絕佳防禦韌性，雙雙鎖定 8 月世錦賽女單簽表。"
-                            },
-                            {
-                                "tag": "女雙戰況",
-                                "tag_color": "red",
-                                "title": "志田千陽 (Chiharu Shida) 與松山奈未 / 田口真彩 / 廣田彩花動態",
-                                "content": "志田千陽與五十嵐有紗正式公告拆夥並退出國家隊；松山奈未、廣田彩花則持續在雙打賽場搭配新秀（如田口真彩 Maya Taguchi、鎌田虹花 Nika Kamata）積極調整組合默契。"
+                                "progress_label": "國外名將備戰指數"
                             }
                         ]
                     }
                 ]
             },
             {
-                "icon": "🎥",
-                "title": "國際與財經影音情報",
+                "icon": "🎬",
+                "title": "國際與財經影音情報 (雙頻道專屬內層互動摺疊卡片)",
                 "sub_sections": [
                     {
-                        "title": "游庭皓《財經皓角》最新影片深層解析",
+                        "title": "游庭皓《財經皓角》距現在最新一期發布影片完整分析",
                         "cards": [
                             {
-                                "tag": "財經皓角 🎬",
-                                "tag_color": "cyan",
-                                "title": "科技股最慘七月，融資甩不掉？這波反彈能夠走多遠？",
-                                "content": "本集早晨財經速解讀深入剖析美台科技股大幅修正後的融資去化與反彈力道，為投資人建立客觀的總體經濟與籌碼觀察架構。",
+                                "tag": "財經皓角 📺",
+                                "tag_color": "red",
+                                "title": "《早晨財經速解讀》最新一期：科技股最慘甩尾季與融資去化解析",
+                                "content": "游庭皓於最新節目中分析，台股大跌過後槓桿與過度融資已獲得適度去化。短線雖然受美股觀望影響，但大盤正建構中期波段築底型態。",
                                 "video_chapters": [
                                     {
-                                        "chapter_title": "01. 科技股最慘 7 月融資去化與甩尾斷頭分析",
-                                        "detail": "<p><b>分析與背景：</b>台美科技股經歷單月急震，主因高槓桿融資散戶過度堆疊引發連鎖平倉。法人現貨在急跌段已出現逢低承接買盤。</p><p><b>💡 具體建議 1：</b>切忌在急跌段盲目使用高槓桿融資抄底，應以現股或分批定期定額防範斷頭風險。<br><b>支持理由：</b>高槓桿融資在波動率放大時極易遭到券商強制平倉（斷頭），造成本金永久性損耗。</p>"
-                                    },
-                                    {
-                                        "chapter_title": "02. 美股反彈驅動因素與費半指數打底架構",
-                                        "detail": "<p><b>分析與背景：</b>美伊地緣政治風險降溫、油價回落帶動美股反彈。費半指數在經歷修復性整理後於整數區間嘗試築底。</p><p><b>💡 具體建議 2：</b>關注輝達 (NVDA) 財報前的籌碼沉澱狀況，將其作為科技股反彈續航力的指標。<br><b>支持理由：</b>輝達為全球 AI 算力龍頭，其財報與指引直接決定北美 CSP 資本支出是否持續認可。</p>"
-                                    },
-                                    {
-                                        "chapter_title": "03. 總經景氣循環與中期資產配置策略",
-                                        "detail": "<p><b>分析與背景：</b>聯準會降息路徑清晰，當前市場正處於『高利率尾聲與降息初期』的景氣過渡期。</p><p><b>💡 具體建議 3：</b>採取『優質市值型 ETF + 投資級公司債』雙軌配置，保留至少 20% 流動資金。<br><b>支持理由：</b>雙軌配置能在享受股市反彈資本利得同時獲得債券降息收益。</p>"
+                                        "title": "💡 節目精華與 3 項具體操作建議 (Actionable Recommendations)",
+                                        "content": "<b>建議 1：逢反彈切忌追高，適度進行槓桿減碼</b><br>• 支持分析：融資去化初期大盤波動仍大，宜保留現金彈性。<br><br><b>建議 2：關注外資期現貨對沖與籌碼動態</b><br>• 支持分析：外資若現貨連三買方能確立短底。<br><br><b>建議 3：佈局具備實質業績之 AI 權值與防禦高股息</b><br>• 支持分析：拉回是優質資產價值浮現時機。"
                                     }
                                 ]
                             }
                         ]
                     },
                     {
-                        "title": "Steven Bartlett《The Diary Of A CEO》最新訪談",
+                        "title": "Steven Bartlett《The Diary Of A CEO》距現在最新一期發布影片完整訪談",
                         "cards": [
                             {
-                                "tag": "DOAC 🎬",
-                                "tag_color": "yellow",
-                                "title": "Pete Buttigieg: The American Dream Is DEAD. We're Running Out Of Time To Fix It!",
-                                "content": "Steven Bartlett 專訪美國前交通部長 Pete Buttigieg，探討美國民主制度挑戰、貧富差距、國家債務與 AI 時代下的社會變革。",
+                                "tag": "DOAC 🎙️",
+                                "tag_color": "darkblue",
+                                "title": "《The Diary Of A CEO》最新訪談：Secretary Pete Buttigieg 專訪",
+                                "content": "Steven Bartlett 專訪前美國交通部長 Pete Buttigieg，深入探討美式民主挑戰、貧富差距與 AI 對國家基礎建設的深刻轉型影響。",
                                 "video_chapters": [
                                     {
-                                        "chapter_title": "01. 美國夢的危機與政治體制運作僵局",
-                                        "detail": "<p><b>分析與背景：</b>Buttigieg 警告政治體制過度極化導致關鍵法案與基礎建設推動受阻。</p><p><b>💡 具體建議 1：</b>企業與個人在制定長遠戰略時，必須將『政治極化導致的政策不確定性』納入風險模型。<br><b>支持理由：</b>單一政策易因政黨輪替而劇烈翻轉，具備彈性架構的營運才能降低政策衝擊。</p>"
-                                    },
-                                    {
-                                        "chapter_title": "02. 貧富差距、稅制漏洞與資本利得借貸",
-                                        "detail": "<p><b>分析與背景：</b>富豪透過持股質押進行免稅借貸消費，而中產階級負擔不成比例的薪資稅。</p><p><b>💡 具體建議 2：</b>個人應建立資產思維，儘早將人力資本轉化為具抗通膨能力之優質股權與實體資產。<br><b>支持理由：</b>單純依賴薪資收入無法對抗通膨，唯有持有優質生產性資產才能充分享受經濟成長紅利。</p>"
-                                    },
-                                    {
-                                        "chapter_title": "03. AI 科技浪潮、勞動市場轉型與個人應對之道",
-                                        "detail": "<p><b>分析與背景：</b>AI 自動化正重塑勞動市場，傳統教育體系與就業安全網尚未準備就緒。</p><p><b>💡 具體建議 3：</b>積極培養『AI 協作能力』與『跨領域批判性思考』，轉型為不可替代的決策者。<br><b>支持理由：</b>AI 將迅速取代重複性工作，但具備同理心與複雜系統設計能力的人才價值將大幅提升。</p>"
+                                        "title": "💡 訪談精華與 3 項具體洞察建議 (Actionable Recommendations)",
+                                        "content": "<b>建議 1：提升個人在 AI 時代的不可替代適應力</b><br>• 支持分析：跨領域技能是解決系統問題關鍵。<br><br><b>建議 2：強化基礎建設與供應鏈資本投資</b><br>• Supporting Rationale：硬體設施為經濟成長實質瓶頸。<br><br><b>建議 3：建立危機管理與長期系統思維</b><br>• Supporting Rationale：聚焦長期價值創造而非短線波動。"
                                     }
                                 ]
                             }
@@ -437,24 +460,13 @@ def main():
                 "title": "軟性議題與生活樂趣",
                 "sub_sections": [
                     {
-                        "title": "趣味冷知識與金融小典故",
-                        "cards": [
-                            {
-                                "tag": "冷知識 💡",
-                                "tag_color": "cyan",
-                                "title": "華爾街『熊市』與『牛市』的命名由來",
-                                "content": "你知道嗎？『牛市 (Bull Market)』與『熊市 (Bear Market)』的名稱來自兩種動物攻擊敵人的姿勢：公牛攻擊時會用角『向上頂 (Upward)』代表股價上漲；而熊攻擊時會用爪子『向下撲 (Downward)』代表股價下跌！"
-                            }
-                        ]
-                    },
-                    {
                         "title": "優質好書推薦 (含直達介紹內頁與原版文獻連結)",
                         "cards": [
                             {
                                 "tag": "好書推薦 📚",
                                 "tag_color": "green",
-                                "title": "《巴菲特寫給股東的信》 (The Essays of Warren Buffett) - 華倫．巴菲特 / 勞倫斯．康納斯",
-                                "content": "<b>📖 簡短書摘簡介 (Book Summary)：</b><br>本書由勞倫斯．康納斯整理巴菲特數十年來寫給波克夏股東的公開信，分類為公司治理、投資哲學、普通股選擇與會計陷阱等，被譽為全球價值投資人的聖經。<br><br><b>💬 經典佳句摘取 (Quote Excerpt)：</b><br><i>「當別人心懷恐懼時，要保持貪婪；當別人滿懷貪婪時，要保持恐懼。」</i><br><br>👉 [點此查看《巴菲特寫給股東的信》詳細書籍介紹與繁體中文電子書內頁](https://www.readmoo.com/book/210168940000101)<br>👉 [點此直達伯克希爾波克夏 (Berkshire Hathaway) 官方原版股東信資料庫](https://www.berkshirehathaway.com/letters/letters.html)"
+                                "title": "《巴菲特寫給股東的信》 (The Essays of Warren Buffett)",
+                                "content": "<b>📖 簡短書摘簡介：</b><br>整理巴菲特數十年來公開信，分類為公司治理與投資哲學，全球價值投資人聖經。<br><br><b>💬 經典佳句摘取：</b><br><i>「當別人心懷恐懼時，要保持貪婪；當別人滿懷貪婪時，要保持恐懼。」</i><br><br>👉 [點此查看詳細介紹與電子書內頁](https://www.readmoo.com/book/210168940000101)"
                             }
                         ]
                     },
@@ -472,6 +484,13 @@ def main():
                 ]
             }
         ]
+
+    briefing_data = {
+        "date": today_str,
+        "fetch_time": fetch_time_str,
+        "output_path": html_output_path,
+        "signals": etf_signals,
+        "tier_sections": tier_sections
     }
     
     print(f"Rendering HTML report to {html_output_path}...")
@@ -480,7 +499,6 @@ def main():
     s_0050 = etf_signals.get('0050', {})
     s_00919 = etf_signals.get('00919', {})
     
-    # Plain text summary formatted for LINE
     line_text = (
         f"📰 【{today_str} 每日綜合情報與籌碼戰報】\n\n"
         f"🟢 0050 元大台灣50：{s_0050.get('signal_title', '')}\n"
@@ -489,10 +507,10 @@ def main():
         f"🟡 00919 群益精選高息：{s_00919.get('signal_title', '')}\n"
         f"• 籌碼動向：{s_00919.get('reason', '')}\n"
         f"• 美股與夜盤：{s_00919.get('overnight_note', '')}\n\n"
-        f"⚖️ 法規修訂（不限範圍）：100億以上公司接軌 IFRS S1/S2，金控銀行導入內控三道模型與三長。\n"
-        f"🏭 地方與企業：桃園捷運綠線衝刺年底通車；7861貝爾威勒與6762達亞近3日 MOPS 無新增重大訊息。\n"
-        f"🏸 羽球戰績：周天成止步台北公開賽四強，全隊衝刺 8/17 新德里世錦賽。\n"
-        f"🎥 影音情報：《財經皓角》7月科技股甩尾去槓桿解析；《DOAC》Pete Buttigieg 專訪。"
+        f"⚖️ 法規修訂：100億以上公司接軌 IFRS S1/S2，證交所最新修訂內控查核程序。\n"
+        f"🏭 地方與企業：桃園捷運綠線完成無人駕駛測試；7861與6762 MOPS 檢核無新增重大訊息。\n"
+        f"🏸 羽球戰績：周天成中國公開賽奪冠，全隊備戰 8/17 印度世錦賽。\n"
+        f"🎥 影音情報：《財經皓角》大盤雙軋行情解析；《DOAC》Pete Buttigieg 專訪。"
     )
     
     # Check for LINE environment variables
