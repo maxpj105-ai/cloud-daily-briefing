@@ -219,7 +219,7 @@ def fetch_mops_announcements(target_codes=['7861', '6762'], days=3):
                 })
     return results
 
-def main():
+def get_chip_report_data():
     today = datetime.datetime.now()
     dates_to_check = []
     curr = today
@@ -241,7 +241,6 @@ def main():
             break
         
         etf = fetch_twse_etf_chip(d)
-        # CRITICAL FIX: Only treat the date as a valid trading day if ETF chip data is published!
         if etf and len(etf) > 0:
             inst = fetch_twse_institutional_summary(d)
             margin = fetch_twse_margin(d)
@@ -259,7 +258,10 @@ def main():
     chip_report['recent_3days_summary'] = summary_days
     chip_report['etf_signals'] = evaluate_etf_signals(summary_days)
     chip_report['mops_announcements'] = fetch_mops_announcements(['7861', '6762'])
-    
+    return chip_report
+
+def main():
+    chip_report = get_chip_report_data()
     print(json.dumps(chip_report, ensure_ascii=False, indent=2))
 
 if __name__ == '__main__':
