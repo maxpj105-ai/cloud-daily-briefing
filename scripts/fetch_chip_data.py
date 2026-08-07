@@ -128,7 +128,6 @@ def evaluate_etf_signals(summary_days, overnight_factors=None):
     summary_days is in reverse chronological order: [Latest, T-1, T-2].
     We convert history to chronological order: [T-2, T-1, Latest].
     """
-    # Sort summary_days chronologically (oldest to newest)
     sorted_days = sorted(summary_days, key=lambda x: x['date'])
     
     signals = {}
@@ -149,7 +148,6 @@ def evaluate_etf_signals(summary_days, overnight_factors=None):
         
         total_3d_lots = sum(lots_history)
         
-        # Base signal from 3-day TWSE chips
         if total_3d_lots > 5000:
             status = "BUY"
             signal_title = "🟢 買入 / 加碼"
@@ -166,7 +164,6 @@ def evaluate_etf_signals(summary_days, overnight_factors=None):
             color = "yellow"
             reason = f"外資近 3 日動態多空交錯（3日累計 {total_3d_lots:+,.0f} 張），籌碼呈現整理態勢，建議保留彈性、觀望或定期定額。"
         
-        # Overnight market cross-analysis considerations
         if code == '0050':
             overnight_note = "【夜盤與美股考量】市值型/含積量高。美股費半與台積電 ADR 暴漲帶動夜盤急拉超千點，短線強烈開盤反彈；惟外資現貨累計賣壓尚待填補，切忌盲目開盤追高，宜觀察外資現貨連買訊號。"
         else:
@@ -187,14 +184,10 @@ def evaluate_etf_signals(summary_days, overnight_factors=None):
     return signals
 
 def fetch_mops_announcements(target_codes=['7861', '6762'], days=3):
-    """
-    Fetch recent MOPS announcements for target companies (7861 Bellwether, 6762 Qromis/Daya).
-    Checks TPEx (O/EM) and TWSE OpenAPI endpoints.
-    """
     results = {code: [] for code in target_codes}
     api_urls = [
-        "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap04_O", # TPEx Mainboard
-        "https://openapi.twse.com.tw/v1/opendata/t187ap04_L"    # TWSE Mainboard
+        "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap04_O",
+        "https://openapi.twse.com.tw/v1/opendata/t187ap04_L"
     ]
     
     for url in api_urls:
@@ -264,4 +257,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
