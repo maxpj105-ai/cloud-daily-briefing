@@ -2,8 +2,8 @@ name: Daily Briefing Cloud Automation
 
 on:
   schedule:
-    # 09:10 AM Taiwan Time (01:10 UTC)
-    - cron: '10 1 * * *'
+    # 09:17 AM Taiwan Time (01:17 UTC) - Avoid peak integer minute queue
+    - cron: '17 1 * * *'
   workflow_dispatch: # Allows manual trigger from mobile GitHub App or web UI
 
 jobs:
@@ -39,4 +39,3 @@ jobs:
         with:
           name: daily-briefing-html
           path: output/*.html
-
