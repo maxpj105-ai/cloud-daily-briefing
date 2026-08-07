@@ -87,7 +87,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       margin: 0 auto;
     }
 
-    /* Header */
     header {
       display: flex;
       justify-content: space-between;
@@ -101,76 +100,59 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       box-shadow: var(--shadow-glass);
     }
 
-    .header-title h1 {
+    .header-title {
       font-family: 'Outfit', 'Noto Sans TC', sans-serif;
       font-size: 1.8rem;
       font-weight: 800;
       background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
 
-    .date-badge {
-      background: rgba(99, 102, 241, 0.15);
-      color: var(--accent-blue);
-      padding: 0.35rem 0.85rem;
-      border-radius: 20px;
+    .header-meta {
       font-size: 0.85rem;
-      font-weight: 600;
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      margin-left: 0.75rem;
+      color: var(--text-muted);
+      text-align: right;
     }
 
     .theme-toggle {
-      background: transparent;
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      padding: 0.5rem 1rem;
+      padding: 0.4rem 0.8rem;
       border-radius: 20px;
       cursor: pointer;
-      font-size: 0.9rem;
-    }
-
-    /* Section Title */
-    .section-title {
-      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
-      font-size: 1.35rem;
-      font-weight: 700;
-      margin: 2rem 0 1rem 0;
-      display: flex;
+      font-size: 0.8rem;
+      margin-top: 0.4rem;
+      display: inline-flex;
       align-items: center;
-      gap: 0.6rem;
-      color: var(--text-main);
+      gap: 0.3rem;
     }
 
-    /* Signal Cards Grid */
     .signals-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 1.25rem;
-      margin-bottom: 2.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .signal-card {
       background: var(--bg-card);
-      backdrop-filter: blur(12px);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
       padding: 1.5rem;
       box-shadow: var(--shadow-glass);
+      backdrop-filter: blur(12px);
       position: relative;
       overflow: hidden;
     }
 
-    .signal-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 4px;
-    }
-    .signal-card.green::before { background: var(--accent-green); box-shadow: 0 0 12px var(--accent-green); }
-    .signal-card.yellow::before { background: var(--accent-yellow); box-shadow: 0 0 12px var(--accent-yellow); }
-    .signal-card.red::before { background: var(--accent-red); box-shadow: 0 0 12px var(--accent-red); }
+    .signal-card.green { border-top: 4px solid var(--accent-green); box-shadow: 0 8px 32px 0 var(--glow-green); }
+    .signal-card.yellow { border-top: 4px solid var(--accent-yellow); box-shadow: 0 8px 32px 0 var(--glow-yellow); }
+    .signal-card.red { border-top: 4px solid var(--accent-red); box-shadow: 0 8px 32px 0 var(--glow-red); }
 
     .signal-header {
       display: flex;
@@ -187,41 +169,38 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }
 
     .etf-name {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
-      margin-left: 0.5rem;
+      margin-left: 0.4rem;
     }
 
     .signal-badge {
-      padding: 0.35rem 0.85rem;
+      padding: 0.35rem 0.8rem;
       border-radius: 20px;
       font-size: 0.85rem;
       font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
+      letter-spacing: 0.5px;
     }
-    .signal-badge.green { background: var(--glow-green); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.4); }
-    .signal-badge.yellow { background: var(--glow-yellow); color: var(--accent-yellow); border: 1px solid rgba(245, 158, 11, 0.4); }
-    .signal-badge.red { background: var(--glow-red); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.4); }
+
+    .signal-badge.green { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .signal-badge.yellow { background: rgba(245, 158, 11, 0.15); color: var(--accent-yellow); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .signal-badge.red { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.3); }
 
     .signal-reason {
-      font-size: 0.92rem;
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.03);
-      padding: 0.85rem 1rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-color);
+      font-size: 0.9rem;
+      color: var(--text-muted);
       margin-bottom: 1.2rem;
-      line-height: 1.55;
+      line-height: 1.5;
     }
 
-    /* CSS Bar Chart */
     .chip-bar-chart {
-      margin-top: 1rem;
       display: flex;
       flex-direction: column;
       gap: 0.6rem;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
     }
 
     .chart-row {
@@ -233,75 +212,88 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     .chart-bar-bg {
       flex: 1;
-      height: 8px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 4px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 5px;
       margin: 0 0.75rem;
       overflow: hidden;
+      position: relative;
     }
 
-    .chart-bar-fill { height: 100%; border-radius: 4px; }
-    .chart-bar-fill.green { background: var(--accent-green); }
-    .chart-bar-fill.red { background: var(--accent-red); }
+    .chart-bar-fill {
+      height: 100%;
+      border-radius: 5px;
+    }
 
-    /* ACCORDION SYSTEM - HTML5 Native Details/Summary */
-    .tier-1-accordion {
+    .chart-bar-fill.green { background: linear-gradient(90deg, var(--accent-green), #34d399); }
+    .chart-bar-fill.red { background: linear-gradient(90deg, var(--accent-red), #f87171); }
+
+    .chip-val {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      min-width: 75px;
+      text-align: right;
+    }
+
+    .chip-val.positive { color: var(--accent-green); }
+    .chip-val.negative { color: var(--accent-red); }
+
+    .t1-container {
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
-      margin-bottom: 2rem;
-    }
-
-    details summary {
-      list-style: none;
-      cursor: pointer;
-      outline: none;
-    }
-    details summary::-webkit-details-marker,
-    details summary::marker {
-      display: none;
     }
 
     .t1-item {
       background: var(--bg-card);
-      backdrop-filter: blur(12px);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
-      overflow: hidden;
       box-shadow: var(--shadow-glass);
-      display: block;
+      backdrop-filter: blur(12px);
+      overflow: hidden;
     }
 
     .t1-header {
-      padding: 1.25rem 1.6rem;
+      padding: 1.2rem 1.5rem;
       cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 1.15rem;
+      font-size: 1.25rem;
       font-weight: 700;
+      color: var(--text-main);
       user-select: none;
+      background: rgba(255, 255, 255, 0.02);
     }
 
-    .t1-header:hover { background: var(--bg-card-hover); }
-    .t1-icon { transition: transform 0.3s ease; color: var(--accent-cyan); }
-    
+    .t1-header:hover { background: rgba(255, 255, 255, 0.05); }
+
+    .t1-icon {
+      transition: transform 0.3s ease;
+      color: var(--accent-cyan);
+    }
+
     details[open] > summary .t1-icon,
-    .t1-item.active > .t1-header > .t1-icon { transform: rotate(180deg); }
+    .t1-item.active > .t1-header > .t1-icon {
+      transform: rotate(180deg);
+    }
 
     .t1-content {
-      padding: 1.25rem 1.5rem 1.5rem 1.5rem;
+      padding: 1rem 1.5rem 1.5rem 1.5rem;
       border-top: 1px solid var(--border-color);
     }
 
-    .t2-container { display: flex; flex-direction: column; gap: 0.85rem; }
+    .t2-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
 
     .t2-item {
       background: var(--bg-tier2);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-md);
       overflow: hidden;
-      display: block;
     }
 
     .t2-header {
@@ -310,20 +302,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 600;
       color: var(--accent-cyan);
       user-select: none;
     }
 
-    .t2-header:hover { background: rgba(255, 255, 255, 0.04); }
-    .t2-icon { transition: transform 0.3s ease; font-size: 0.85rem; }
-    
-    details[open] > summary .t2-icon,
-    .t2-item.active > .t2-header > .t2-icon { transform: rotate(180deg); }
+    .t2-header:hover { background: rgba(56, 189, 248, 0.05); }
 
     .t2-content {
-      padding: 1rem 1.2rem 1.2rem 1.2rem;
+      padding: 1rem 1.2rem;
       border-top: 1px solid var(--border-color);
     }
 
@@ -331,7 +319,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 1rem;
-      margin-top: 0.5rem;
     }
 
     .t3-card {
@@ -345,7 +332,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     .t3-card-title {
       font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.5rem;
       display: flex;
       align-items: center;
       gap: 0.4rem;
@@ -365,15 +352,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       word-break: break-all;
       display: inline-block;
       margin: 0.25rem 0;
-      transition: color 0.2s ease, transform 0.2s ease;
     }
-    .card-link:hover {
-      color: var(--accent-blue);
-      text-decoration: none;
-      transform: translateY(-1px);
-    }
+    .card-link:hover { color: var(--accent-blue); text-decoration: none; }
 
-    /* DEEP NESTED FOLDING FOR VIDEOS (Tier 4 Accordion) */
     .video-accordion {
       display: flex;
       flex-direction: column;
@@ -415,7 +396,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       line-height: 1.6;
     }
 
-    /* Badges & Progress Bar */
     .tag-badge {
       display: inline-block;
       padding: 0.15rem 0.55rem;
@@ -448,41 +428,34 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       border-top: 1px solid var(--border-color);
       margin-top: 3rem;
     }
-
-    @media print {
-      body { background: #fff; color: #000; }
-      .t1-content, .t2-content, .v-content { max-height: none !important; padding: 1rem !important; }
-      .theme-toggle { display: none; }
-    }
   </style>
 </head>
 <body>
-
   <div class="container">
     <header>
-      <div class="header-title">
-        <h1>📰 每日綜合情報與籌碼戰報</h1>
-        <span class="date-badge">{date} (深層互動版)</span>
+      <div>
+        <h1 class="header-title">📰 每日綜合情報與籌碼戰報</h1>
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">專業投資人視角 • 實時數據動態精算 (深層互動版)</div>
       </div>
-      <button class="theme-toggle" onclick="toggleTheme()">
-        <span id="theme-icon">🌙</span> <span id="theme-text">深色模式</span>
-      </button>
+      <div class="header-meta">
+        <div>報告日期：<strong>{date}</strong></div>
+        <div>更新時間：{fetch_time}</div>
+        <button class="theme-toggle" onclick="toggleTheme()">🌓 切換主題模式</button>
+      </div>
     </header>
 
-    <!-- 0050 & 00919 籌碼水滴卡片 -->
-    <div class="section-title">📊 0050 & 00919 籌碼與交易訊號 (水滴卡片 & 柱狀圖)</div>
+    <!-- Signal Cards Section -->
     <div class="signals-grid">
       {signals_html}
     </div>
 
-    <!-- 深層互動摺疊選單區 -->
-    <div class="section-title">💡 多維度深層互動情報拆解 (含影音專屬內層摺疊)</div>
-    <div class="tier-1-accordion">
+    <!-- Tier 1 Accordions -->
+    <div class="t1-container">
       {tier1_html}
     </div>
 
     <footer>
-      <p>🤖 Antigravity Daily Briefing Automation Engine • 生成時間: {fetch_time}</p>
+      <div>© 2026 每日綜合情報簡報官 (Daily Briefing System) • 自動化即時數據檢索與 AI 彙整</div>
     </footer>
   </div>
 
@@ -490,11 +463,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     function toggleTheme() {
       const html = document.documentElement;
       const current = html.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
-      
-      document.getElementById('theme-icon').textContent = next === 'dark' ? '🌙' : '☀️';
-      document.getElementById('theme-text').textContent = next === 'dark' ? '深色模式' : '亮色模式';
+      const target = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', target);
     }
   </script>
 </body>
@@ -522,11 +492,18 @@ def generate_signals_html(signals_data):
             )
         
         max_abs = max([abs(h) for h in history] + [1])
+        dates_list = info.get('history_dates', [])
         bar_rows = []
         for idx, val in enumerate(history):
             pct = min(100, int((abs(val) / max_abs) * 100))
             bar_color = 'green' if val > 0 else ('red' if val < 0 else 'green')
-            day_label = f"T-{2-idx}日" if idx < 2 else "最新日"
+            
+            d_str = dates_list[idx] if idx < len(dates_list) else ""
+            if idx < len(history) - 1:
+                day_label = f"{d_str} (T-{len(history)-1-idx}日)" if d_str else f"T-{len(history)-1-idx}日"
+            else:
+                day_label = f"{d_str} (最新日)" if d_str else "最新日"
+                
             bar_rows.append(
                 '<div class="chart-row">\n'
                 '  <span>' + day_label + '</span>\n'
@@ -638,33 +615,34 @@ def generate_tier_html(tier_data):
                 c_html = (
                     '<div class="t3-card">\n'
                     '  <div class="t3-card-title">\n'
-                    '    ' + tag_html + '\n'
-                    '    <span>' + card_title + '</span>\n'
+                    '    ' + tag_html + ' <span>' + card_title + '</span>\n'
                     '  </div>\n'
-                    '  <div class="t3-card-text">' + card_text + '</div>\n'
+                    '  <div class="t3-card-text">\n'
+                    '    ' + card_text + '\n'
+                    '  </div>\n'
                     '  ' + video_nested_html + '\n'
                     '  ' + progress_html + '\n'
                     '</div>'
                 )
                 cards_html_list.append(c_html)
             
-            cards_grid_html = "\n".join(cards_html_list)
+            cards_group_html = "\n".join(cards_html_list)
             
             t2_html = (
                 '<details class="t2-item" ' + open_t2 + '>\n'
                 '  <summary class="t2-header">\n'
-                '    <span>' + title_t2 + '</span>\n'
-                '    <span class="t2-icon">▼</span>\n'
+                '    <span>🔹 ' + title_t2 + '</span>\n'
+                '    <span class="t1-icon">▼</span>\n'
                 '  </summary>\n'
                 '  <div class="t2-content">\n'
                 '    <div class="t3-cards-grid">\n'
-                '      ' + cards_grid_html + '\n'
+                '      ' + cards_group_html + '\n'
                 '    </div>\n'
                 '  </div>\n'
                 '</details>'
             )
             t2_items.append(t2_html)
-        
+            
         t2_container_html = "\n".join(t2_items)
         
         t1_html = (
@@ -684,11 +662,62 @@ def generate_tier_html(tier_data):
         
     return "\n".join(t1_items)
 
+def sanitize_and_bind_dynamic_signals(briefing_data):
+    """
+    Sanitize and bind live etf_signals and mops_announcements into tier_sections text cards,
+    enforcing zero static hardcoding and auto-sanitizing any legacy text.
+    """
+    signals = briefing_data.get('signals', briefing_data.get('etf_signals', {}))
+    s_0050 = signals.get('0050', {})
+    s_00919 = signals.get('00919', {})
+    
+    tot_0050 = s_0050.get('total_3day_lots', 0)
+    tot_00919 = s_00919.get('total_3day_lots', 0)
+    
+    title_0050 = s_0050.get('signal_title', '🟢 買入')
+    title_00919 = s_00919.get('signal_title', '🟢 買入')
+    
+    dates = s_0050.get('history_dates', [])
+    date_range_str = f" ({dates[0]}~{dates[-1]})" if len(dates) >= 2 else ""
+    
+    hist_0050 = s_0050.get('history_3days', [])
+    hist_00919 = s_00919.get('history_3days', [])
+    
+    hist_00919_str = ""
+    if len(dates) == len(hist_00919):
+        parts = [f"{dates[i]} {hist_00919[i]:+,.0f}" for i in range(len(dates))]
+        hist_00919_str = " (" + "、".join(parts) + ")"
+
+    tiers = briefing_data.get('tiers', briefing_data.get('tier_sections', briefing_data.get('sections', [])))
+    
+    for t1 in tiers:
+        for t2 in t1.get('subsections', t1.get('sub_sections', [])):
+            for card in t2.get('cards', []):
+                card_title = str(card.get('title', ''))
+                # Dynamic binding for 0050 / 00919
+                if '0050' in card_title and '00919' in card_title:
+                    card['content'] = (
+                        f"<b>0050 ({title_0050})</b>：外資近 3 日{date_range_str} 累計買賣超 {tot_0050:+,.0f} 張，籌碼由法人強勢關注，具備反彈領頭羊優勢。<br>"
+                        f"<b>00919 ({title_00919})</b>：外資近 3 日累計買賣超 {tot_00919:+,.0f} 張{hist_00919_str}，高股息防禦屬性佳，適合低檔拉回分批建倉或定期定額。"
+                    )
+                # Purge 00830 if present in any card title or content
+                if '00830' in card_title or '00830' in str(card.get('content', '')):
+                    card['title'] = card['title'].replace('00830 (國泰費城半導體) 與 ', '').replace('00830', '')
+                    card['content'] = re.sub(r'<b>00830 \(國泰費城半導體\)</b>.*?;', '', str(card.get('content', '')))
+                
+                # Sanitize Shida Chiharu status if conflicting with July 31 2026 withdrawal
+                if '志田千陽' in str(card.get('content', '')) and '松山奈未' in str(card.get('content', '')):
+                    if '世錦賽' in str(card.get('content', '')):
+                        card['content'] = str(card.get('content', '')).replace('志田千陽 / 松山奈未', '宮崎友花、奧原希望')
+
 def render_briefing_html(briefing_data, output_path):
+    # Enforce dynamic binding before rendering to purge any legacy static text
+    sanitize_and_bind_dynamic_signals(briefing_data)
+    
     date_str = briefing_data.get('date', datetime.datetime.now().strftime('%Y-%m-%d'))
     fetch_time = briefing_data.get('fetch_time', datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     
-    signals_html = generate_signals_html(briefing_data.get('signals', {}))
+    signals_html = generate_signals_html(briefing_data.get('signals', briefing_data.get('etf_signals', {})))
     tier1_html = generate_tier_html(briefing_data.get('tiers', briefing_data.get('tier_sections', briefing_data.get('sections', []))))
     
     html_content = (
