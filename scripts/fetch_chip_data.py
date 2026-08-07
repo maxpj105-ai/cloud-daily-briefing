@@ -228,13 +228,6 @@ def get_chip_report_data():
             dates_to_check.append(curr.strftime('%Y%m%d'))
         curr -= datetime.timedelta(days=1)
     
-    chip_report = {
-        'fetch_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'recent_3days_summary': [],
-        'etf_signals': {},
-        'mops_announcements': {}
-    }
-    
     summary_days = []
     for d in dates_to_check:
         if len(summary_days) >= 3:
@@ -255,13 +248,18 @@ def get_chip_report_data():
             }
             summary_days.append(day_entry)
             
-    chip_report['recent_3days_summary'] = summary_days
-    chip_report['etf_signals'] = evaluate_etf_signals(summary_days)
-    chip_report['mops_announcements'] = fetch_mops_announcements(['7861', '6762'])
-    return chip_report
+    etf_signals = evaluate_etf_signals(summary_days)
+    mops_ann = fetch_mops_announcements(['7861', '6762'])
+    return summary_days, etf_signals, mops_ann
 
 def main():
-    chip_report = get_chip_report_data()
+    summary_days, etf_signals, mops_ann = get_chip_report_data()
+    chip_report = {
+        'fetch_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'recent_3days_summary': summary_days,
+        'etf_signals': etf_signals,
+        'mops_announcements': mops_ann
+    }
     print(json.dumps(chip_report, ensure_ascii=False, indent=2))
 
 if __name__ == '__main__':
